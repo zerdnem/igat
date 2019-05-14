@@ -52,7 +52,8 @@ func input() string {
 
 func fetchpastebin(link string) {
 	url := "https://www.pastebin.com/raw/"
-	res, err := http.Get(url + link)
+    res, err := http.Get(url + link)
+
 
 	if err != nil {
 		panic(err.Error())
@@ -71,8 +72,11 @@ func fetchpastebin(link string) {
 
 func fetchpasteaccount() {
 	url := "https://haveibeenpwned.com/api/v2/pasteaccount/"
-	res, err := http.Get(url + email)
 
+    client := &http.Client{}
+    req, err := http.NewRequest("GET", url+email, nil)
+    req.Header.Add("User-Agent", "igat")
+    res, err := client.Do(req)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -103,14 +107,18 @@ func fetchpasteaccount() {
 	}
 	for _, data := range info {
 		if data.Source == "Pastebin" {
-			fetchpastebin(data.ID)
+			go fetchpastebin(data.ID)
 		}
 	}
 }
 
+
 func fetchbreachedaccount() interface{} {
 	url := "https://haveibeenpwned.com/api/v2/breachedaccount/"
-	res, err := http.Get(url + email)
+    client := &http.Client{}
+    req, err := http.NewRequest("GET", url+email, nil)
+    req.Header.Add("User-Agent", "igat")
+    res, err := client.Do(req)
 
 	if err != nil {
 		panic(err.Error())
@@ -157,7 +165,7 @@ func getemailsfromfile(source string) {
 }
 
 func getdata(account string) {
-	elapsed := time.Since(time.Now())
+    start := time.Now()
 	data := fetchbreachedaccount()
 
 	if results, ok := data.(Results); ok {
@@ -172,7 +180,7 @@ func getdata(account string) {
 			fmt.Println()
 		}
 		fetchpasteaccount()
-		fmt.Printf("[+] Completed in %s\n", elapsed)
+		fmt.Printf("[+] Completed in %.2fs\n", time.Since(start).Seconds())
 		fmt.Println()
 	} else {
 		fmt.Println(data)
