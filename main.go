@@ -52,8 +52,7 @@ func input() string {
 
 func fetchpastebin(link string) {
 	url := "https://www.pastebin.com/raw/"
-    res, err := http.Get(url + link)
-
+	res, err := http.Get(url + link)
 
 	if err != nil {
 		panic(err.Error())
@@ -73,10 +72,10 @@ func fetchpastebin(link string) {
 func fetchpasteaccount() {
 	url := "https://haveibeenpwned.com/api/v2/pasteaccount/"
 
-    client := &http.Client{}
-    req, err := http.NewRequest("GET", url+email, nil)
-    req.Header.Add("User-Agent", "igat")
-    res, err := client.Do(req)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url+email, nil)
+	req.Header.Add("User-Agent", "igat")
+	res, err := client.Do(req)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -112,13 +111,12 @@ func fetchpasteaccount() {
 	}
 }
 
-
 func fetchbreachedaccount() interface{} {
 	url := "https://haveibeenpwned.com/api/v2/breachedaccount/"
-    client := &http.Client{}
-    req, err := http.NewRequest("GET", url+email, nil)
-    req.Header.Add("User-Agent", "igat")
-    res, err := client.Do(req)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url+email, nil)
+	req.Header.Add("User-Agent", "igat")
+	res, err := client.Do(req)
 
 	if err != nil {
 		panic(err.Error())
@@ -165,7 +163,7 @@ func getemailsfromfile(source string) {
 }
 
 func getdata(account string) {
-    start := time.Now()
+	start := time.Now()
 	data := fetchbreachedaccount()
 
 	if results, ok := data.(Results); ok {
@@ -188,18 +186,22 @@ func getdata(account string) {
 }
 
 func main() {
-	flag.String("email", "", "Email account you want to test")
+	email := flag.String("email", "", "Email account you want to test")
 	file := flag.String("file", "", "Load a file with multiple email accounts")
 	flag.Parse()
 	if *file != "" {
 		getemailsfromfile(*file)
 	}
+	if *email != "" {
+		getdata(*email)
+		os.Exit(0)
+	}
 	if len(flag.Args()) > 0 {
 		flag.PrintDefaults()
 		os.Exit(1)
 	} else {
-		email = input()
-		getdata(email)
+		input := input()
+		getdata(input)
 	}
 
 }
