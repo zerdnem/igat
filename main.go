@@ -80,7 +80,6 @@ func fetchpasteaccount() {
 		panic(err.Error())
 	}
 
-
 	body, err := ioutil.ReadAll(res.Body)
 
 	if err != nil {
@@ -116,11 +115,10 @@ func fetchbreachedaccount(email string) interface{} {
 	url := "https://haveibeenpwned.com/api/v2/breachedaccount/"
 	client := &http.Client{}
 
-	fmt.Println(email)
 	req, err := http.NewRequest("GET", url+email, nil)
 	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.51 Safari/537.360")
-		req.Header.Add("api-version", "2")
-				req.Header.Add("Accept", "application/vnd.haveibeenpwned.v2+json")
+	req.Header.Add("api-version", "2")
+	req.Header.Add("Accept", "application/vnd.haveibeenpwned.v2+json")
 
 	res, err := client.Do(req)
 
@@ -128,14 +126,17 @@ func fetchbreachedaccount(email string) interface{} {
 		panic(err.Error())
 	}
 
-	if (res.StatusCode) == http.StatusForbidden {
-		return fmt.Sprintln("[-] HIBP error related stuff.")
+	switch res.StatusCode {
+	case http.StatusForbidden:
+		fmt.Println("[-] HIBP error related stuff.")
+		os.Exit(1)
+	case http.StatusUnauthorized:
+		fmt.Println("[-] HIBP error related stuff.")
+		os.Exit(1)
+	case http.StatusNotFound:
+		fmt.Println("[-] Account not pwned... :(")
+		os.Exit(1)
 	}
-
-	if res.StatusCode == http.StatusNotFound {
-		return fmt.Sprintln("[-] Account not pwned... :(")
-	}
-
 	fmt.Println("[!] Account pwned...Listing Breaches...")
 	fmt.Println()
 
@@ -149,6 +150,7 @@ func fetchbreachedaccount(email string) interface{} {
 	json.Unmarshal(body, &results)
 
 	return results
+
 }
 
 func getemailsfromfile(source string) {
